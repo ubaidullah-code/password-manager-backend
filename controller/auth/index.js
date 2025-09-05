@@ -62,7 +62,11 @@ export const loginUser = async (req, res) => {
 
     res.cookie("Token", token, {
       httpOnly: true,
-      maxAge: 86400000, // 1 day
+      maxAge: 86400000,
+       // 1 day
+         httpOnly: true,
+      secure: true,        // since Vercel serves HTTPS
+      sameSite: "None",
       secure: process.env.NODE_ENV === "production",
       sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
     })
@@ -82,7 +86,13 @@ export const loginUser = async (req, res) => {
 // LOGOUT
 export const logoutUser = (req, res) => {
   try {
-    res.clearCookie("Token").send({
+    res.clearCookie("Token",{
+  httpOnly: true,
+  secure: true,
+  sameSite: "None",
+})
+    
+    .send({
       success: true,
       message: "Logout successfully",
     })
