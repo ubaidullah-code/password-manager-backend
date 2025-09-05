@@ -63,17 +63,32 @@ export const passwordStore = async (req, res) => {
 
 
 export const passwordGet = async (req, res) => {
+  const search = req.query.search || "";
+  console.log("search query:", search);
+
   try {
     const userId = req.user.userId;
-    const entries = await PasswordEntry.find({ userId })
-   
+
+    // 🔎 Base query: always filter by userId
+    let query = { userId };
+
+    if (search) {
+      query.$or = [
+        { serviceName: { $regex: search, $options: "i" } },
+        { password: { $regex: search, $options: "i" } },
+        { siteUrl: { $regex: search, $options: "i" } },
+      ];
+    }
+
+    // Fetch entries
+    const entries = await PasswordEntry.find(query);
 
     if (!entries || entries.length === 0) {
       return res.status(404).json({ success: false, message: "No passwords found" });
     }
-  
-    // decrypt each entry
-    const result = entries.map(entry => ({
+
+    // Map and decrypt
+    const result = entries.map((entry) => ({
       id: entry._id,
       serviceName: entry.serviceName,
       username: entry.username,
@@ -82,15 +97,15 @@ export const passwordGet = async (req, res) => {
       notes: entry.notes,
       createdAt: entry.createdAt,
       updatedAt: entry.updatedAt,
-      
     }));
 
     res.json({ success: true, data: result });
   } catch (error) {
-    console.log("error", error);
-    res.status(500).send({ success: false, message: "Internal Server Error" });
+    console.error("Error fetching passwords:", error);
+    res.status(500).json({ success: false, message: "Internal Server Error" });
   }
 };
+
 
 export const passwordDelete = async (req ,res) =>{
    
@@ -143,3 +158,4 @@ export const passwordEdit = async (req, res) => {
     res.status(500).send({ success: false, message: "Internal Server Error" });
   }
 };
+
