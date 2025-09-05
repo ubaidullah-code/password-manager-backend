@@ -9,7 +9,7 @@ import passwordManagerRouter from './routes/password-manager/index.js';
 const PORT = process.env.PORT || 5004;
 const app = express()
 app.use(cors({
-    origin: 'https://password-manager-ui-chi.vercel.app',
+    origin: ['https://password-manager-ui-chi.vercel.app', 'http://localhost:5173'],
     credentials: true
 }));
 app.use(express.json())
